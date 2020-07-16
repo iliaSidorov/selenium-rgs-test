@@ -33,7 +33,7 @@ public class RGSTest {
 
     @Before
     public void setUp() {
-        System.setProperty("web.driver.chrome.driver", "driver/chromedriver.exe");
+        System.setProperty("web.driver.chrome.driver", "E:\\projects\\seleniumhw1\\driver\\chromedriver.exe");
         driver = new ChromeDriver();
         driver.manage().window().maximize();
 
@@ -70,26 +70,30 @@ public class RGSTest {
 
         //fill the application form
         WebElement lastNameInput = driver.findElement(By.name("LastName"));
-        lastNameInput.sendKeys(LAST_NAME);
+        fillTheField(lastNameInput, LAST_NAME);
+
         WebElement firstNameInput = driver.findElement(By.name("FirstName"));
-        firstNameInput.sendKeys(FIRST_NAME);
+        fillTheField(firstNameInput, FIRST_NAME);
+
         WebElement middleNameInput = driver.findElement(By.name("MiddleName"));
-        middleNameInput.sendKeys(MIDDLE_NAME);
+        fillTheField(middleNameInput, MIDDLE_NAME);
 
         Select dropRegion = new Select(driver.findElement(By.name("Region")));
         dropRegion.selectByVisibleText(REGION);
 
         WebElement phoneInput = driver.findElement(By.xpath("//label[text()='Телефон']/following-sibling::input"));
-        phoneInput.sendKeys(PHONE);
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//label[text()='Телефон']/following-sibling::input")));
+        fillTheField(phoneInput, PHONE);
+
         WebElement emailInput = driver.findElement(By.name("Email"));
-        emailInput.sendKeys(EMAIL);
+        fillTheField(emailInput, EMAIL);
 
         WebElement contactDateInput = driver.findElement(By.name("ContactDate"));
         contactDateInput.click();
-        contactDateInput.sendKeys(CONTACT_DATE);
+        fillTheField(contactDateInput, CONTACT_DATE);
 
         WebElement commentInput = driver.findElement(By.name("Comment"));
-        commentInput.sendKeys(COMMENT);
+        fillTheField(commentInput, COMMENT);
 
         driver.findElement(By.xpath("//input[@class='checkbox']")).click();
 
@@ -98,7 +102,7 @@ public class RGSTest {
         assertEquals(FIRST_NAME, firstNameInput.getAttribute("value"));
         assertEquals(MIDDLE_NAME, middleNameInput.getAttribute("value"));
         assertEquals(REGION, dropRegion.getFirstSelectedOption().getText());
-        assertTrue(phoneInput.getAttribute("value").contains("+7 (925) 925-25-25"));
+        assertEquals("+7 (925) 925-25-25", phoneInput.getAttribute("value"));
         assertEquals(EMAIL, emailInput.getAttribute("value"));
         assertEquals("24.07.2020", contactDateInput.getAttribute("value"));
         assertEquals(COMMENT, commentInput.getAttribute("value"));
@@ -109,10 +113,16 @@ public class RGSTest {
         //check if email input is not validated
         assertTrue(driver.findElement(By.xpath("//span[contains(text(), 'Введите адрес электронной почты')]")).isDisplayed());
     }
+    
+    private void fillTheField(WebElement element, String input) {
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        element.sendKeys(input);
+    }
 
     @After
     public void tearDown() {
         driver.quit();
     }
+
 
 }
