@@ -9,6 +9,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
@@ -21,16 +22,15 @@ public class RGSTest {
     private WebDriverWait wait;
     private final static String BASE_URL = "http://www.rgs.ru";
 
-
-    //test values
+    //test data
     private final static String FIRST_NAME = "Альберт";
     private final static String MIDDLE_NAME = "Германович";
     private final static String LAST_NAME = "Эйнштейн";
     private final static String REGION = "Магаданская область";
     private final static String PHONE = "9259252525";
-    private final static String PHONE_MASKED = PHONE.replaceFirst("(\\d{3})(\\d{3})(\\d{2})(\\d+)", "+7 ($1) $2-$3-$4");
+    private final static String PHONE_MASKED = getPhoneMasked();
     private final static String EMAIL = "qwertyqwerty";
-    private final static String CONTACT_DATE = "24072020";
+    private final static String CONTACT_DATE = "24.07.2020";
     private final static String COMMENT = "Black holes are where God divided by zero";
 
     @Before
@@ -38,8 +38,9 @@ public class RGSTest {
         System.setProperty("web.driver.chrome.driver", "E:\\projects\\seleniumhw1\\driver\\chromedriver.exe");
         driver = new ChromeDriver();
         driver.manage().window().maximize();
+        driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
 
-        //limit condition timeout
+        //limit conditional timeout
         wait = new WebDriverWait(driver, 10);
 
         driver.get(BASE_URL);
@@ -91,12 +92,12 @@ public class RGSTest {
         fillTheField(emailInput, EMAIL);
 
         WebElement contactDateInput = driver.findElement(By.name("ContactDate"));
-        contactDateInput.click();
-        fillTheField(contactDateInput, CONTACT_DATE);
+        fillTheContactDate(contactDateInput);
 
         WebElement commentInput = driver.findElement(By.name("Comment"));
         fillTheField(commentInput, COMMENT);
 
+        //select a checkbox
         driver.findElement(By.xpath("//input[@class='checkbox']")).click();
 
         //assert that input fields are filled with test values
@@ -106,9 +107,10 @@ public class RGSTest {
         assertEquals(REGION, dropRegion.getFirstSelectedOption().getText());
         assertEquals(PHONE_MASKED, phoneInput.getAttribute("value"));
         assertEquals(EMAIL, emailInput.getAttribute("value"));
-        assertEquals("24.07.2020", contactDateInput.getAttribute("value"));
+        assertEquals(CONTACT_DATE, contactDateInput.getAttribute("value"));
         assertEquals(COMMENT, commentInput.getAttribute("value"));
 
+        //try to send form
         WebElement submitButton = driver.findElement(By.xpath("//button[@id='button-m']"));
         submitButton.click();
 
@@ -116,11 +118,29 @@ public class RGSTest {
         assertTrue(driver.findElement(By.xpath("//span[contains(text(), 'Введите адрес электронной почты')]")).isDisplayed());
     }
 
+    //UTIL METHODS
+    //configure input
     private void fillTheField(WebElement element, String input) {
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         element.sendKeys(input);
     }
 
+    //configure contact date input
+    private void fillTheContactDate(WebElement dateInput) {
+        dateInput.click();
+        List<WebElement> enabledDays = driver.findElements(By.xpath("//table[@class='table-condensed']//tbody//td[@class='datepicker-day']"));
+        for (WebElement enabledDay : enabledDays) {
+            if (enabledDay.getText().equals(CONTACT_DATE.substring(0, 2))) {
+                enabledDay.click();
+                break;
+            }
+        }
+    }
+
+    //mask phone input according to pattern
+    private static String getPhoneMasked() {
+        return PHONE.replaceFirst("(\\d{3})(\\d{3})(\\d{2})(\\d+)", "+7 ($1) $2-$3-$4");
+    }
 
     @After
     public void tearDown() {
