@@ -21,12 +21,14 @@ public class RGSTest {
     private WebDriverWait wait;
     private final static String BASE_URL = "http://www.rgs.ru";
 
+
     //test values
     private final static String FIRST_NAME = "Альберт";
     private final static String MIDDLE_NAME = "Германович";
     private final static String LAST_NAME = "Эйнштейн";
     private final static String REGION = "Магаданская область";
     private final static String PHONE = "9259252525";
+    private final static String PHONE_MASKED = PHONE.replaceFirst("(\\d{3})(\\d{3})(\\d{2})(\\d+)", "+7 ($1) $2-$3-$4");
     private final static String EMAIL = "qwertyqwerty";
     private final static String CONTACT_DATE = "24072020";
     private final static String COMMENT = "Black holes are where God divided by zero";
@@ -102,7 +104,7 @@ public class RGSTest {
         assertEquals(FIRST_NAME, firstNameInput.getAttribute("value"));
         assertEquals(MIDDLE_NAME, middleNameInput.getAttribute("value"));
         assertEquals(REGION, dropRegion.getFirstSelectedOption().getText());
-        assertEquals("+7 (925) 925-25-25", phoneInput.getAttribute("value"));
+        assertEquals(PHONE_MASKED, phoneInput.getAttribute("value"));
         assertEquals(EMAIL, emailInput.getAttribute("value"));
         assertEquals("24.07.2020", contactDateInput.getAttribute("value"));
         assertEquals(COMMENT, commentInput.getAttribute("value"));
@@ -113,11 +115,12 @@ public class RGSTest {
         //check if email input is not validated
         assertTrue(driver.findElement(By.xpath("//span[contains(text(), 'Введите адрес электронной почты')]")).isDisplayed());
     }
-    
+
     private void fillTheField(WebElement element, String input) {
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         element.sendKeys(input);
     }
+
 
     @After
     public void tearDown() {
